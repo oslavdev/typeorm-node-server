@@ -1,0 +1,48 @@
+version: "3"
+services:
+  server-api-getaway:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "7100:7100"
+    volumes:
+      - ./:/usr/src/server
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - REDIS_URL=redis://cache
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/database
+      - DATABASE_PORT=5432
+      - DATABASE_HOST=host.docker.internal
+      - POSTGRES_DB=database
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PORT=7100
+
+  db:
+    image: postgres:12
+    restart: always
+    environment:
+      - POSTGRES_DB=database
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "3337:5432"
+
+  redis:
+    image: redis:5.0.14-alpine
+    container_name: cache
+    restart: always
+    ports:
+      - 6379:6379
+
+volumes:
+  pgdata:
+    driver: local
+  pgconf:
+    driver: local
+  pglog:
+    driver: local
